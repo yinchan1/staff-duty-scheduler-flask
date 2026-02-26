@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shift Scheduler</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; line-height: 1.6; }
+        .filter-section { background: #f4f4f4; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .shift-item { margin-bottom: 10px; padding: 5px; border-bottom: 1px solid #ddd; }
+        .delete-btn { color: red; margin-left: 15px; text-decoration: none; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Shift Scheduler</h1>
+    <div style="margin-bottom: 20px;">
+    <a href="/add">Add New Shift</a> | 
+    <a href="/export">Export to CSV</a> | 
+    <a href="/calendar">View Full Calendar Table</a>
+    </div>
+
+
+    <div class="filter-section">
+        <h3>Filter Shifts</h3>
+        <form action="/" method="get">
+            Employee: <input type="text" name="employee" placeholder="Enter name">
+            Date: <input type="date" name="date">
+            <button type="submit">Search</button>
+            <a href="/">Clear Filters</a>
+        </form>
+    </div>
+    
+    <hr>
+
+    <h2>Current Schedule</h2>
+    <ul>
+    {% for shift in shifts %}
+        <li class="shift-item">
+            <strong>{{ shift.date }}</strong> | {{ shift.time }} | 
+            Employee: <strong>{{ shift.employee }}</strong>
+            <a href="/delete/{{ loop.index0 }}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this shift?')">Delete</a>
+        </li>
+    {% else %}
+        <li>No shifts found.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

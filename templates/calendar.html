@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Duty Roster</title>
+    <style>
+      
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        
+       
+        @media print {
+            .no-print { display: none; } 
+            button { display: none; }    
+        }
+    </style>
+</head>
+<body>
+    <h1>Staff Duty Roster</h1>
+    
+    <div class="no-print">
+        <a href="/">← Back to Management</a> | 
+        <button onclick="window.print()">Download as PDF / Print</button>
+    </div>
+
+    <table>
+        <hr>
+            <div class="no-print">
+                <h3>Staff Work Summary (Total Shifts)</h3>
+                    <ul>
+                    {% for emp, count in stats.items() %}
+                        <li><strong>{{ emp }}</strong>: {{ count }} shifts</li>
+                    {% endfor %}
+    </ul>
+            </div>
+
+        <thead>
+            <tr>
+                <th>Employee / Date</th>
+                {% for d in dates %}
+                    <th>{{ d }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td><strong>{{ emp }}</strong></td>
+                {% for d in dates %}
+                    <td>{{ schedule_map.get((emp, d), "-") }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
