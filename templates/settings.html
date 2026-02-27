@@ -1,0 +1,50 @@
+<h2>Shift & Leave Settings</h2>
+<form method="POST">
+    <h3>Shift Types</h3>
+    <div id="shift-container">
+        {% for s in settings.shift_types %}
+        <div class="row">
+            <input type="text" name="shift_name[]" value="{{ s.name }}" placeholder="Name">
+            <input type="text" name="shift_time[]" value="{{ s.time }}" placeholder="Time">
+            <input type="number" name="shift_quota[]" value="{{ s.quota }}" placeholder="Max People">
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" onclick="addShiftRow()">+ Add More Shift</button>
+
+    <h3>Leave Types</h3>
+    <div id="leave-container">
+        {% for l in settings.leave_types %}
+        <div class="row">
+            <input type="text" name="leave_name[]" value="{{ l.name }}" placeholder="Leave Name">
+            <input type="number" name="leave_quota[]" value="{{ l.quota }}" placeholder="Max People">
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" onclick="addLeaveRow()">+ Add More Leave</button>
+
+    <br><br>
+    <button type="submit" style="background: green; color: white;">Save All Settings</button>
+</form>
+
+<script>
+function addShiftRow() {
+    const div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = `
+        <input type="text" name="shift_name[]" placeholder="Name">
+        <input type="text" name="shift_time[]" placeholder="Time">
+        <input type="number" name="shift_quota[]" placeholder="Max People">
+    `;
+    document.getElementById('shift-container').appendChild(div);
+}
+function addLeaveRow() {
+    const div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = `
+        <input type="text" name="leave_name[]" placeholder="Leave Name">
+        <input type="number" name="leave_quota[]" placeholder="Max People">
+    `;
+    document.getElementById('leave-container').appendChild(div);
+}
+</script>

@@ -1,18 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Shift</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Shift</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 0.9em; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
+        input:focus, select:focus { border-color: #3498db; outline: none; box-shadow: 0 0 5px rgba(52,152,219,0.3); }
+        .btn { background-color: #27ae60; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s; }
+        .btn:hover { background-color: #219150; }
+        .back-link { display: block; margin-top: 20px; text-align: center; color: #3498db; text-decoration: none; font-size: 0.9em; }
+        .back-link:hover { text-decoration: underline; }
+        .quota-info { font-size: 0.8em; color: #666; font-style: italic; }
+    </style>
 </head>
 <body>
-    <h1>Add Shift</h1>
-    <form method="post">
-        Date: <input type="date" name="date" required><br>
-        Time: <input type="text" name="time" placeholder="09:00-13:00" required><br>
-        Employee: <input type="text" name="employee" required><br>
-        <input type="submit" value="Add">
+
+<div class="container">
+    <h2>Add Staff Shift</h2>
+    <form action="/add" method="POST">
+        <label for="employee">Employee Name:</label>
+        <input type="text" id="employee" name="employee" placeholder="e.g. Samantha Chan" required>
+
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required>
+
+        <label for="shift_type">Select Shift / Leave Category:</label>
+        <select name="shift_type" id="shift_type" required>
+            <option value="" disabled selected>-- Choose an option --</option>
+            
+            <optgroup label="Work Shifts">
+                {% for s in settings.shift_types %}
+                    <option value="{{ s.name }}">
+                        {{ s.name }} ({{ s.time }}) - Limit: {{ s.quota }} pax
+                    </option>
+                {% endfor %}
+            </optgroup>
+
+            <optgroup label="Absence / Leave">
+                {% for l in settings.leave_types %}
+                    <option value="{{ l.name }}">
+                        {{ l.name }} - Limit: {{ l.quota }} pax
+                    </option>
+                {% endfor %}
+            </optgroup>
+        </select>
+        <p class="quota-info">* System will block entry if the quota is full.</p>
+
+        <button type="submit" class="btn">Confirm & Add to Schedule</button>
     </form>
     
-    <hr> <a href="/">Back to List</a> | 
-    <a href="/calendar" style="font-weight:bold; color:blue;">View Full Roster Table</a>
+    <a href="/" class="back-link">← Back to Roster Overview</a>
+</div>
+
 </body>
 </html>

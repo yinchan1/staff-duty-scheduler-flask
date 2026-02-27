@@ -1,38 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Duty Roster</title>
+    <meta charset="UTF-8">
+    <title>Staff Duty Roster</title>
     <style>
-      
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; background-color: #fff; color: #333; }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
         
-       
+        /* Navigation & Filters */
+        .no-print { margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; }
+        .nav-link { text-decoration: none; color: #3498db; font-weight: bold; margin-right: 15px; }
+        .filter-form { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; }
+        
+        /* Buttons */
+        .print-btn { background-color: #e74c3c; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .print-btn:hover { background-color: #c0392b; }
+        .reset-btn { text-decoration: none; font-size: 0.9em; color: #666; padding: 8px; }
+
+        /* Summary Section */
+        .summary-box { background: #eef7ff; border: 1px solid #d1e9fb; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+        .summary-box h3 { margin-top: 0; font-size: 1.1em; color: #2980b9; }
+        .summary-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+        .summary-list li { background: white; padding: 5px 12px; border-radius: 20px; border: 1px solid #b3d7f2; font-size: 0.9em; }
+
+        /* Table Design */
+        table { border-collapse: collapse; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: center; }
+        th { background-color: #34495e; color: white; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; }
+        .emp-col { text-align: left; background-color: #fcfcfc; font-weight: bold; width: 160px; position: sticky; left: 0; }
+        .shift-data { color: #2c3e50; font-weight: 500; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
+        /* Print Settings */
         @media print {
-            .no-print { display: none; } 
-            button { display: none; }    
+            .no-print { display: none !important; }
+            body { margin: 0; }
+            table { box-shadow: none; width: 100%; border: 1px solid #000; }
+            th, td { border: 1px solid #000; padding: 8px; }
+            th { background-color: #eee !important; color: #000 !important; }
+            thead { display: table-header-group; }
         }
     </style>
 </head>
 <body>
+
     <h1>Staff Duty Roster</h1>
-    
+
     <div class="no-print">
-        <a href="/">← Back to Management</a> | 
-        <button onclick="window.print()">Download as PDF / Print</button>
+        <a href="/" class="nav-link">← Management Home</a>
+        <button onclick="downloadPDF()" class="print-btn">Download PDF / Print</button>
+    </div>
+
+    <div class="no-print">
+        <form action="/calendar" method="GET" class="filter-form">
+            <div class="filter-group">
+                <label>View Mode</label>
+                <select name="view" onchange="this.form.submit()">
+                    <option value="all" {% if view == 'all' %}selected{% endif %}>Full Schedule</option>
+                    <option value="1week" {% if view == '1week' %}selected{% endif %}>1 Week View</option>
+                    <option value="2weeks" {% if view == '2weeks' %}selected{% endif %}>2 Weeks View</option>
+                    <option value="month" {% if view == 'month' %}selected{% endif %}>Monthly View</option>
+                </select>
+            </div>
+
+            {% if view == '1week' or view == '2weeks' %}
+            <div class="filter-group">
+                <label>Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date }}" onchange="this.form.submit()">
+            </div>
+            {% endif %}
+
+            {% if view == 'month' %}
+            <div class="filter-group">
+                <label>Select Month</label>
+                <input type="month" name="month" value="{{ selected_month }}" onchange="this.form.submit()">
+            </div>
+            {% endif %}
+
+            <a href="/calendar?view=all" class="reset-btn">Clear All</a>
+        </form>
+    </div>
+
+    <div class="summary-box">
+        <h3>Shift Totals for Selected Period</h3>
+        <ul class="summary-list">
+            {% for emp, count in stats.items() %}
+                <li><strong>{{ emp }}</strong>: {{ count }} entries</li>
+            {% else %}
+                <li>No data for this selection.</li>
+            {% endfor %}
+        </ul>
     </div>
 
     <table>
-        <hr>
-            <div class="no-print">
-                <h3>Staff Work Summary (Total Shifts)</h3>
-                    <ul>
-                    {% for emp, count in stats.items() %}
-                        <li><strong>{{ emp }}</strong>: {{ count }} shifts</li>
-                    {% endfor %}
-    </ul>
-            </div>
-
         <thead>
             <tr>
                 <th>Employee / Date</th>
@@ -44,13 +106,38 @@
         <tbody>
             {% for emp in employees %}
             <tr>
-                <td><strong>{{ emp }}</strong></td>
+                <td class="emp-col">{{ emp }}</td>
                 {% for d in dates %}
-                    <td>{{ schedule_map.get((emp, d), "-") }}</td>
+                    <td class="shift-data">{{ schedule_map.get((emp, d), "-") }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+    function downloadPDF() {
+        // Logic to name the PDF based on selection
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view') || 'Full';
+        const month = urlParams.get('month') || '';
+        const start = urlParams.get('start_date') || '';
+
+        let fileName = "Staff_Roster";
+        if (view === 'month' && month) fileName = "Roster_" + month;
+        else if (start) fileName = "Roster_Week_" + start;
+        else fileName = "Staff_Roster_All_Time";
+
+        // Temporarily change title to set PDF name
+        const originalTitle = document.title;
+        document.title = fileName;
+        
+        window.print();
+        
+        // Restore title
+        setTimeout(() => { document.title = originalTitle; }, 1000);
+    }
+    </script>
+
 </body>
-</html>
+</html>≈ß
